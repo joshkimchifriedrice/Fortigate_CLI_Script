@@ -1,4 +1,4 @@
-#!./.venv/bin/python
+#!./.venv/Scripts/python.exe
 """Fortigate SSH CLI tool for remote command execution and log collection."""
 
 import argparse

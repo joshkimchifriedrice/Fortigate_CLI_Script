@@ -1,4 +1,4 @@
-#!./.venv/bin/python
+#!./.venv/Scripts/python.exe
 """SSH client module for Fortigate connections."""
 
 import paramiko

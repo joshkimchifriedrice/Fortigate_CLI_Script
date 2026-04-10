@@ -1,4 +1,4 @@
-#!./.venv/bin/python
+#!./.venv/Scripts/python.exe
 """Command definitions for Fortigate CLI tool."""
 
 import re
