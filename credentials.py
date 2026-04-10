@@ -1,8 +1,12 @@
+#!./.venv/bin/python
 """Credential management module for Fortigate SSH connections."""
 
 import json
 from pathlib import Path
 from typing import Dict, Optional
+from getpass import getpass
+
+from ssh_client import FortigateSSHClient
 
 
 class CredentialManager:
@@ -10,7 +14,7 @@ class CredentialManager:
 
     def __init__(self):
         """Initialize credential manager and config file path."""
-        self.config_dir = Path.home() / ".fortigate_config"
+        self.config_dir = Path.home() / ".config" / ".fortigate_config"
         self.config_file = self.config_dir / "config.json"
         self._ensure_config_exists()
 
@@ -34,7 +38,25 @@ class CredentialManager:
             json.dump(config, f, indent=2)
 
     def save_profile(self, profile_name: str, ip: str, username: str, password: str) -> None:
-        """Save a credential profile in plaintext."""
+        """Save a credential profile after validating the connection."""
+        while True:
+            # Test SSH connection first
+            ssh_client = FortigateSSHClient()
+            if ssh_client.connect(ip, username, password):
+                ssh_client.disconnect()
+                print(f"✓ Connection successful to {ip}, credentials are valid.")
+                break
+            else:
+                print(f"✗ Connection failed to {ip} with provided credentials. Please try again.\n")
+                
+            # Ask for new credentials
+            print(f"\nSaving credentials for profile: {profile_name}")
+            ip = input("Fortigate IP address: ").strip()
+            username = input("Username: ").strip()
+            password = getpass("Password: ")
+            
+
+        # Only save if connection was successful
         config = self._read_config()
         config["profiles"][profile_name] = {
             "ip": ip,

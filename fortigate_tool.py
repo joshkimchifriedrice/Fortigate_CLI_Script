@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!./.venv/bin/python
 """Fortigate SSH CLI tool for remote command execution and log collection."""
 
 import argparse
@@ -50,16 +50,16 @@ def cmd_run(args):
     ssh_client = FortigateSSHClient()
     print(f"Connecting to {profile['ip']}...")
     if not ssh_client.connect(profile["ip"], profile["username"], profile["password"]):
-        print("Failed to connect to Fortigate device")
         sys.exit(1)
 
     # Map command to method name
-    command_method_name = f"{args.command}_command"
-    if not hasattr(Commands, command_method_name):
-        print(f"Error: Command '{args.command}' not found.")
+    command_method_name = {
+        "darrp": "get_darrp_status_command"
+    }.get(args.command)
+    if not command_method_name:
+        print(f"Error: Command '{args.command}' is not supported.")
         ssh_client.disconnect()
         sys.exit(1)
-
     # Execute command method and get output
     try:
         command_method = getattr(Commands, command_method_name)
@@ -97,11 +97,11 @@ def main():
     """Main entry point for the CLI."""
     parser = argparse.ArgumentParser(
         description="Fortigate SSH CLI tool for remote command execution and log collection\n\nbasic usage:\n" \
-        "   1. Run \"python fortigate-tool creds save <profile_name>\" to save IP and login credentials for a Fortigate device.\n" \
-        "   2. Run \"python fortigate-tool run <profile_name> <command>\" to execute a command on the device and display output.\n" \
+        "   1. Run \"python fortigate_tool.py creds save <profile_name>\" to save IP and login credentials for a Fortigate device.\n" \
+        "   2. Run \"python fortigate_tool.py run <profile_name> <command>\" to execute a command on the device and display output.\n" \
         "   3. Use the -f option to save command output to a file for later analysis.\n\n" \
         "<command> list:\n" \
-        "   darp - Execute command on Fortigate",
+        "   darrp - Grab DARRP diagnostic output and parse it based on if the channel has changed since the last check.\n",
         formatter_class=argparse.RawTextHelpFormatter,
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")

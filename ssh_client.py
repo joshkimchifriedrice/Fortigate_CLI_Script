@@ -1,6 +1,8 @@
+#!./.venv/bin/python
 """SSH client module for Fortigate connections."""
 
 import paramiko
+import socket
 from typing import Optional
 
 
@@ -32,13 +34,22 @@ class FortigateSSHClient:
             self.client.connect(ip, port=port, username=username, password=password, timeout=timeout)
             return True
         except paramiko.AuthenticationException:
-            print(f"Authentication failed for {username}@{ip}")
+            print(f"✗ Error: Invalid username or password for {username}@{ip}")
             return False
-        except paramiko.SSHException as e:
-            print(f"SSH connection error: {e}")
+        except socket.gaierror:
+            print(f"✗ Error: IP address '{ip}' does not exist or is unreachable")
+            return False
+        except socket.timeout:
+            print(f"✗ Error: Connection timeout - IP '{ip}' is unreachable")
+            return False
+        except (OSError, socket.error) as e:
+            if "timed out" in str(e).lower() or "timeout" in str(e).lower():
+                print(f"✗ Error: Connection timeout - IP '{ip}' is unreachable")
+            else:
+                print(f"✗ Error: IP address '{ip}' does not exist or is unreachable")
             return False
         except Exception as e:
-            print(f"Connection error: {e}")
+            print(f"✗ Error: Failed to connect: {str(e)}")
             return False
 
     def execute_command(self, command: str) -> Optional[str]:
