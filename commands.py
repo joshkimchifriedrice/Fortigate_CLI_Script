@@ -42,7 +42,9 @@ class Commands:
             raise RuntimeError(f"Could not extract time from output: {time_output}")
         
         hours, minutes, seconds = time_match.groups()
-        capture_time = datetime.strptime(f"{hours}:{minutes}:{seconds}", "%H:%M:%S")
+        # Build a datetime with today's date combined with the device time
+        time_part = datetime.strptime(f"{hours}:{minutes}:{seconds}", "%H:%M:%S").time()
+        capture_time = datetime.combine(datetime.now().date(), time_part)
         print(f"Extracted time: {capture_time}")
         
         # Append "execute time" output to log file
