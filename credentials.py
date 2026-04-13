@@ -1,4 +1,4 @@
-#!./.venv/bin/python
+#!./.venv/Scripts/python.exe
 """Credential management module for Fortigate SSH connections."""
 
 import json

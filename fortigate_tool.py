@@ -1,4 +1,4 @@
-#!./.venv/bin/python
+#!./.venv/Scripts/python.exe
 """Fortigate SSH CLI tool for remote command execution and log collection."""
 
 import argparse
@@ -63,7 +63,12 @@ def cmd_run(args):
     # Execute command method and get output
     try:
         command_method = getattr(Commands, command_method_name)
-        output = command_method(ssh_client)
+        # Pass delay if provided (used by get_darrp_status_command)
+        delay_val = getattr(args, 'delay', None)
+        if delay_val is not None:
+            output = command_method(ssh_client, delay_val)
+        else:
+            output = command_method(ssh_client)
     except RuntimeError as e:
         print(f"Error: {e}")
         ssh_client.disconnect()
@@ -76,8 +81,8 @@ def cmd_run(args):
     print(output)
 
     # Save to file if specified
-    if args.file:
-        output_file = Path(args.file)
+    if getattr(args, 'file', None):
+        output_file = Path(getattr(args, 'file'))
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -125,7 +130,8 @@ def main():
     run_parser = subparsers.add_parser("run", help="Execute command on Fortigate")
     run_parser.add_argument("profile", help="Profile name")
     run_parser.add_argument("command", help="Command to execute")
-    run_parser.add_argument("-f", "--file", help="Append output to file")
+    # run_parser.add_argument("-f", "--file", help="Append output to file")
+    run_parser.add_argument("-d", "--delay", type=int, default=30, help="Delay in seconds between DARRP checks (default: 30)")
     run_parser.set_defaults(func=cmd_run)
 
     args = parser.parse_args()

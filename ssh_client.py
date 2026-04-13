@@ -1,4 +1,4 @@
-#!./.venv/bin/python
+#!./.venv/Scripts/python.exe
 """SSH client module for Fortigate connections."""
 
 import paramiko
@@ -67,7 +67,7 @@ class FortigateSSHClient:
             return None
 
         try:
-            stdin, stdout, stderr = self.client.exec_command(command)
+            _, stdout, stderr = self.client.exec_command(command)
             output = stdout.read().decode()
             error = stderr.read().decode()
 
