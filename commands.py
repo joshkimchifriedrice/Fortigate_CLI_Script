@@ -114,7 +114,7 @@ class Commands:
             for key, first_data in wtp_dict_first.items():
                 second_data = wtp_dict_second.get(key)
                 first_chan = first_data.get('oper_chan')
-                second_chan = second_data.get('oper_chan') if second_data else None
+                second_chan = second_data.get('new_chan') if second_data else None
 
                 # Compare first vs second captures
                 print(f"Comparing {key}: oper_chan={first_chan} with second capture new_chan={second_chan}")
@@ -138,13 +138,17 @@ class Commands:
             Commands._append_to_csv(csv_file, capture_time, base)
             print(f"Created {csv_file} with {len(base)} entries")
 
-            # Separate iterations with newlines.
-            for _p in (same_file, csv_file):
-                try:
-                    with open(_p, 'a', newline='') as _f:
-                        _f.write('\n\n\n')
-                except Exception as _e:
-                    print(f"Error appending newlines to {_p}: {_e}")
+        # Append two empty CSV rows for readability instead of raw newlines
+        for _p in (same_file, csv_file):
+            try:
+                print(f"Creating {_p} with header and blank rows for readability")
+                with open(_p, 'a', newline='') as _f:
+                    print(f"Appending blank row to {_p} for readability")
+                    _writer = csv.writer(_f)
+                    _writer.writerow([])
+                    _writer.writerow([])
+            except Exception as _e:
+                print(f"Error appending blank CSV row to {_p}: {_e}")
 
         # Return combined output (first wlac, second wlac, debug)
         return time_output + "\n" + wlac_output + "\n" + wlac_output2 + "\n" + dbg_output
