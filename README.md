@@ -17,6 +17,8 @@ Simple CLI to save Fortigate credentials and run diagnostic commands. See [forti
 - **Notes:** Save a profile first using the `creds save` step. Test the run command manually before scheduling. Ensure the account running the task can access the venv and working directory.
 
 ## **Quick Start And Scheduling**
+- **Setup:** Run `.\.venv\Scripts\Activate.ps1` in the project directory.
+    - *If there's an issue, delete the .venv directory and run `python -m venv .venv` first(with python installed)*
 - **1.** Save credentials: `python fortigate_tool.py creds save myprofile`
 - **2.** Test run: `python fortigate_tool.py run myprofile darrp -d 15`
 - **3.** Schedule: create a Task Scheduler task pointing to your venv `python.exe`, arguments `fortigate_tool.py run <profile> darrp` as above, and set "Start in" to the project folder like `C:\Users\josh\Desktop\Fortigate_CLI_Script\`.
