@@ -131,7 +131,7 @@ def main():
     run_parser.add_argument("profile", help="Profile name")
     run_parser.add_argument("command", help="Command to execute")
     # run_parser.add_argument("-f", "--file", help="Append output to file")
-    run_parser.add_argument("-d", "--delay", type=int, default=15, help="Delay in seconds between DARRP checks (default: 15)")
+    run_parser.add_argument("-d", "--delay", type=int, default=30, help="Delay in seconds between DARRP checks (default: 30)")
     run_parser.set_defaults(func=cmd_run)
 
     args = parser.parse_args()

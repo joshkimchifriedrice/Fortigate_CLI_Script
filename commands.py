@@ -12,7 +12,7 @@ class Commands:
     """Command manager with methods for each Fortigate command."""
 
     @staticmethod
-    def get_darrp_status_command(ssh_client, delay: int = 15) -> str:
+    def get_darrp_status_command(ssh_client, delay: int = 30) -> str:
         """Execute DARP diagnostic command and return output.
 
         This runs an initial `diagnose ... darrp`, parses it, runs the debug
@@ -109,27 +109,14 @@ class Commands:
         wtp_dict_second = Commands._parse_wlac_table(wlac_output2)
         print(f"Parsed {len(wtp_dict_second)} WTP entries (second capture)")
 
-        # Step 5: Ensure each composite device exists in channel_changed.csv and compare channels
+        # Step 5: Compare captures and record changes/unchanged devices
         if csv_file.exists():
-            # Read existing entries to know which devices are present
-            latest_channels = Commands._get_latest_channels(csv_file)
-
             for key, first_data in wtp_dict_first.items():
                 second_data = wtp_dict_second.get(key)
                 first_chan = first_data.get('oper_chan')
                 second_chan = second_data.get('oper_chan') if second_data else None
 
-                # If this composite key is not present in channel_changed.csv, add it there first
-                if key not in latest_channels:
-                    row_src = second_data if second_data else first_data
-                    row = dict(row_src)
-                    row['oper_chan'] = first_chan if first_chan is not None else ''
-                    row['new_chan'] = second_chan if second_chan is not None else ''
-                    Commands._append_to_csv(csv_file, capture_time, {key: row})
-                    print(f"Added new device {key} to {csv_file}")
-                    continue
-
-                # Existing device: compare first vs second captures
+                # Compare first vs second captures
                 print(f"Comparing {key}: oper_chan={first_chan} with second capture new_chan={second_chan}")
                 print(f"Device {first_data.get('wtp_id')} rId={first_data.get('rId')} first={first_chan} second={second_chan}")
 
@@ -150,7 +137,14 @@ class Commands:
             base = wtp_dict_second if wtp_dict_second else wtp_dict_first
             Commands._append_to_csv(csv_file, capture_time, base)
             print(f"Created {csv_file} with {len(base)} entries")
-        
+
+            # Separate iterations with newlines.
+            for _p in (same_file, csv_file):
+                try:
+                    with open(_p, 'a', newline='') as _f:
+                        _f.write('\n\n\n')
+                except Exception as _e:
+                    print(f"Error appending newlines to {_p}: {_e}")
 
         # Return combined output (first wlac, second wlac, debug)
         return time_output + "\n" + wlac_output + "\n" + wlac_output2 + "\n" + dbg_output
