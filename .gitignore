@@ -1,2 +1,7 @@
 *.log
 *.csv
+.venv/
+.venv\
+__pycache__/
+*.pyc
+*.xml
